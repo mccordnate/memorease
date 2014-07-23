@@ -38,6 +38,8 @@ import it.gmariotti.cardslib.library.internal.base.BaseCard;
 
             addCardHeader(header);
 
+            setSwipeable(true);
+
             //Set the card inner text
             setTitle(mTitleMain);
         }
