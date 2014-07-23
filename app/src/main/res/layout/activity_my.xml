@@ -1,0 +1,32 @@
+<android.support.v4.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- The main content view -->
+    <FrameLayout
+        android:id="@+id/fragment_main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+
+        <ImageButton
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:id="@+id/imageButton"
+            android:background="@drawable/ic_circle"
+            android:src="@drawable/ic_content_new"
+            android:text="+"
+            android:textSize="40sp"
+            android:layout_gravity="right|bottom"
+            android:clickable="true"/>
+
+    </FrameLayout>
+
+    <it.gmariotti.cardslib.library.view.CardListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/myList"/>
+
+</android.support.v4.widget.DrawerLayout>
