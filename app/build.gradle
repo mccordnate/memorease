@@ -4,13 +4,8 @@ android {
     compileSdkVersion 19
     buildToolsVersion '20.0.0'
     defaultConfig {
-<<<<<<< HEAD
-        applicationId "com.example.tommy.memorease"
+        applicationId "com.getmemorease.memorease"
         minSdkVersion 14
-=======
-        applicationId 'com.example.tommy.memorease'
-        minSdkVersion 15
->>>>>>> 69186aa717757a23797afb864f6db22f72fade33
         targetSdkVersion 19
         versionCode 1
         versionName '1.0'
@@ -28,9 +23,5 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.github.gabrielemariotti.cards:library:1.8.0'
-<<<<<<< HEAD
-=======
-    compile 'com.github.gabrielemariotti.cards:library-extra:1.8.0'
     compile files('libs/Parse-1.5.1.jar')
->>>>>>> 69186aa717757a23797afb864f6db22f72fade33
 }

@@ -12,11 +12,11 @@
             android:label="@string/app_name" >
         </activity>
         <activity
-            android:name=".CheckActivity"
+            android:name="com.getmemorease.memorease.CheckActivity"
             android:label="@string/title_activity_check" >
         </activity>
         <activity
-            android:name=".LoginActivity"
+            android:name="com.getmemorease.memorease.LoginActivity"
             android:label="@string/title_activity_login" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
