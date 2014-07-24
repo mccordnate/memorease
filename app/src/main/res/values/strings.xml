@@ -8,5 +8,6 @@
     <string name="popupOkayButton">Okay</string>
     <string name="title_activity_check">CheckActivity</string>
     <string name="title_activity_login">LoginActivity</string>
+    <string name="popupCancelButton">Cancel</string>
 
 </resources>

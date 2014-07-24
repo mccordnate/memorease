@@ -70,6 +70,7 @@ public class MyActivity extends Activity {
                 LayoutParams.WRAP_CONTENT);
 
         final EditText editText = (EditText)popupView.findViewById(R.id.editText);
+
         final Button okayButton = (Button)popupView.findViewById(R.id.okayButton);
         okayButton.setOnClickListener(new Button.OnClickListener() {
 
@@ -78,7 +79,7 @@ public class MyActivity extends Activity {
                 popupWindow.dismiss();
                 layout_MainMenu.getForeground().setAlpha(0);
 
-                SwipeableCard card = new SwipeableCard(getActivity(), editText.getText().toString(), " Inner text ");
+                SwipeableCard card = new SwipeableCard(getActivity(), editText.getText().toString(), "Level 1");
                 cards.add(card);
 
                 CardArrayAdapter mCardArrayAdapter = new CardArrayAdapter(getActivity(), cards);
@@ -89,7 +90,19 @@ public class MyActivity extends Activity {
                 if (listView != null) {
                     listView.setAdapter(mCardArrayAdapter);
                 }
+
             }
+        });
+
+        final Button cancelButton = (Button)popupView.findViewById(R.id.cancelButton);
+        cancelButton.setOnClickListener(new Button.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                popupWindow.dismiss();
+                layout_MainMenu.getForeground().setAlpha(0);
+            }
+
         });
 
         popupWindow.setFocusable(true);
