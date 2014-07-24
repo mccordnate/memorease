@@ -10,6 +10,14 @@
         <activity
             android:name="com.getmemorease.memorease.MyActivity"
             android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name=".CheckActivity"
+            android:label="@string/title_activity_check" >
+        </activity>
+        <activity
+            android:name=".LoginActivity"
+            android:label="@string/title_activity_login" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -17,4 +25,8 @@
             </intent-filter>
         </activity>
     </application>
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
 </manifest>
