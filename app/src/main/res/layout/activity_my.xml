@@ -1,6 +1,10 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/mainmenu"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_height="fill_parent"
+    android:windowSoftInputMode="adjustResize"
+    android:theme="@style/AppTheme"
+    android:foreground="@drawable/dim">
 
     <it.gmariotti.cardslib.library.view.CardListView
         android:layout_width="match_parent"
@@ -14,8 +18,6 @@
         android:id="@+id/imageButton"
         android:background="@drawable/ic_circle"
         android:src="@drawable/ic_content_new"
-        android:text="+"
-        android:textSize="40sp"
         android:layout_gravity="bottom|right"
         android:clickable="true"
         android:onClick="onClick"/>

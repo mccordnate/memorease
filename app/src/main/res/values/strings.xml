@@ -4,5 +4,7 @@
     <string name="app_name">Memorease</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="popupAddItem">Add an item</string>
+    <string name="popupOkayButton">Okay</string>
 
 </resources>
