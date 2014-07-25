@@ -20,8 +20,6 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.tommy.memorease.R;
-
 import java.util.ArrayList;
 
 import it.gmariotti.cardslib.library.internal.Card;

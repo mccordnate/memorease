@@ -10,8 +10,6 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.example.tommy.memorease.R;
-
 public class MemorizeCardActivity extends Activity {
     private String item = null;
 

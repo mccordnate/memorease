@@ -9,8 +9,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.example.tommy.memorease.R;
-
 import com.parse.LogInCallback;
 import com.parse.Parse;
 import com.parse.ParseException;
