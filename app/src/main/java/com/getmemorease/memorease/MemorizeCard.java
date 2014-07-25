@@ -91,5 +91,13 @@ import it.gmariotti.cardslib.library.internal.CardHeader;
         }
         return "Completed!";
     }
+
+    public Time getNextTime() {
+        return nextTime;
+    }
+
+    public void setNextTime(Time nextTime) {
+        this.nextTime = nextTime;
+    }
 }
 

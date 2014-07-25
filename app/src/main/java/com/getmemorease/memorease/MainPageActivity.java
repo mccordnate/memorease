@@ -20,9 +20,15 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.parse.FindCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
@@ -45,6 +51,24 @@ public class MainPageActivity extends Activity {
         layout_MainMenu = (FrameLayout) findViewById(R.id.mainmenu);
         layout_MainMenu.getForeground().setAlpha(0);
 
+        ParseQuery<ParseObject> query = new ParseQuery<ParseObject>("Card");
+        query.whereEqualTo("user", ParseUser.getCurrentUser());
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> parseObjects, ParseException e) {
+                for(ParseObject parseObject : parseObjects){
+                    MemorizeCard card = new MemorizeCard(getApplicationContext(), parseObject.getString("info"), parseObject.getInt("level"), new Time(parseObject.getString("time")));
+                    cards.add(card);
+
+                    cardListCreate();
+                }
+            }
+        });
+
+
+    }
+
+    public void cardListCreate(){
         CardArrayAdapter mCardArrayAdapter = new CardArrayAdapter(getActivity(), cards);
         mCardArrayAdapter.setEnableUndo(true);
         mCardArrayAdapter.setInnerViewTypeCount(1);
@@ -142,6 +166,13 @@ public class MainPageActivity extends Activity {
 
                         MemorizeCard card = new MemorizeCard(getActivity(), input.getText().toString(), 1, now);
                         cards.add(card);
+
+                        ParseObject parseCard = new ParseObject("Card");
+                        parseCard.put("user", ParseUser.getCurrentUser());
+                        parseCard.put("info", card.getCardHeader().getTitle());
+                        parseCard.put("level", 1);
+                        parseCard.put("time", now.toString());
+                        parseCard.saveInBackground();
 
                         CardArrayAdapter mCardArrayAdapter = new CardArrayAdapter(getActivity(), cards);
                         mCardArrayAdapter.setEnableUndo(true);
