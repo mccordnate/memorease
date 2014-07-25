@@ -10,5 +10,6 @@
     <string name="popupCancelButton">Cancel</string>
     <string name="title_activity_memorize_card">MemorizeCard</string>
     <string name="notfound">Not found</string>
+    <string name="action_logout">Logout</string>
 
 </resources>

@@ -22,8 +22,16 @@ public class LoginActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        Parse.enableLocalDatastore(this);
-        Parse.initialize(this, "jBdBeXxeExKcNqhA8Z1cO3b1EUpUP28bHNIbAdzm", "af9JUMCI74K8ouSnFzWTCAb7jXNF9DdkGXxOLlDO");
+        Bundle extras = getIntent().getExtras();
+        Boolean localDatastoreEnabled = false;
+        if (extras != null) {
+            localDatastoreEnabled = extras.getBoolean("localDatastoreEnabled");
+        }
+
+        if(!localDatastoreEnabled) {
+            Parse.enableLocalDatastore(this);
+            Parse.initialize(this, "jBdBeXxeExKcNqhA8Z1cO3b1EUpUP28bHNIbAdzm", "af9JUMCI74K8ouSnFzWTCAb7jXNF9DdkGXxOLlDO");
+        }
         ParseUser currentUser = ParseUser.getCurrentUser();
         if (currentUser != null) {
             // Go to the user info activity

@@ -20,6 +20,8 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.parse.ParseUser;
+
 import java.util.ArrayList;
 
 import it.gmariotti.cardslib.library.internal.Card;
@@ -68,6 +70,12 @@ public class MainPageActivity extends Activity {
         int id = item.getItemId();
         if (id == R.id.action_settings) {
             return true;
+        } else if(id == R.id.action_logout){
+            ParseUser.getCurrentUser().logOut();
+            Intent intent = new Intent(this, LoginActivity.class);
+            intent.putExtra("localDatastoreEnabled", true);
+            startActivity(intent);
+            finish();
         }
         return super.onOptionsItemSelected(item);
     }
