@@ -9,5 +9,7 @@
     <string name="title_activity_check">CheckActivity</string>
     <string name="title_activity_login">LoginActivity</string>
     <string name="popupCancelButton">Cancel</string>
+    <string name="title_activity_memorize_card">MemorizeCard</string>
+    <string name="notfound">Not found</string>
 
 </resources>

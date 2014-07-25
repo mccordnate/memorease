@@ -1,0 +1,28 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center_vertical"
+    android:theme="@style/AppTheme"
+    tools:context="com.getmemorease.memorease.memorizecard">
+
+    <TextView
+        android:id="@+id/displayItem"
+        android:text="@string/notfound"
+        android:textSize="30sp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="90sp"
+        android:gravity="center"/>
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/checkmarkButton"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="96dp"
+        android:src="@drawable/ic_cab_done_holo_light"
+        android:onClick="checkmarkOnClick"/>
+
+</RelativeLayout>

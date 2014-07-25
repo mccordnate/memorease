@@ -20,7 +20,7 @@
         android:src="@drawable/ic_content_new"
         android:layout_gravity="bottom|right"
         android:clickable="true"
-        android:onClick="onClick"
+        android:onClick="addOnClick"
         android:windowSoftInputMode="adjustResize"/>
 
 </FrameLayout>

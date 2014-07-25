@@ -18,7 +18,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:text="@string/popupAddItem"
-                    android:textSize="20dp"/>
+                    android:textSize="20sp"/>
                 <EditText
                     android:id="@+id/editText"
                     android:layout_width="150dp"
@@ -32,13 +32,13 @@
                     android:orientation="horizontal">
                     <Button
                         android:id="@+id/okayButton"
-                        android:layout_width="wrap_content"
+                        android:layout_width="79sp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:text="@string/popupOkayButton" />
                     <Button
                         android:id="@+id/cancelButton"
-                        android:layout_width="wrap_content"
+                        android:layout_width="79sp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:text="@string/popupCancelButton" />

@@ -1,4 +1,4 @@
-package com.example.tommy.memorease;
+package com.getmemorease.memorease;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

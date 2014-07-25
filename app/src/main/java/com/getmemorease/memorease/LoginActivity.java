@@ -13,7 +13,6 @@ import com.example.tommy.memorease.R;
 
 import com.parse.LogInCallback;
 import com.parse.Parse;
-import com.parse.ParseAnalytics;
 import com.parse.ParseException;
 import com.parse.ParseUser;
 import com.parse.SignUpCallback;
@@ -30,7 +29,7 @@ public class LoginActivity extends Activity {
         ParseUser currentUser = ParseUser.getCurrentUser();
         if (currentUser != null) {
             // Go to the user info activity
-            startActivity(new Intent(this, MyActivity.class));
+            startActivity(new Intent(this, MainPageActivity.class));
             finish();
         }
         else{
@@ -65,7 +64,7 @@ public class LoginActivity extends Activity {
         ParseUser.logInInBackground(emailEditText.getText().toString(), passEditText.getText().toString(), new LogInCallback() {
             public void done(ParseUser user, ParseException e) {
                 if (user != null) {
-                    startActivity(new Intent(LoginActivity.this, MyActivity.class));
+                    startActivity(new Intent(LoginActivity.this, MainPageActivity.class));
                     Toast.makeText(getApplicationContext(),
                             "Login Successful!", Toast.LENGTH_LONG).show();
                     finish();
@@ -92,7 +91,7 @@ public class LoginActivity extends Activity {
         user.signUpInBackground(new SignUpCallback() {
             public void done(ParseException e) {
                 if (e == null) {
-                    startActivity(new Intent(LoginActivity.this, MyActivity.class));
+                    startActivity(new Intent(LoginActivity.this, MainPageActivity.class));
                     Toast.makeText(getApplicationContext(), "Sign up successful!", Toast.LENGTH_LONG);
                     finish();
                 } else {

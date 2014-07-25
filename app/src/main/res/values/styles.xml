@@ -2,9 +2,5 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="android:Theme.Holo.Light.DarkActionBar">
-        <item name="android:popupWindowStyle">
-            @layout/popup
-        </item>
     </style>
-
 </resources>
