@@ -1,6 +1,8 @@
 package com.getmemorease.memorease;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.format.Time;
@@ -15,6 +17,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.PopupWindow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.tommy.memorease.R;
@@ -72,7 +75,7 @@ public class MainPageActivity extends Activity {
     }
 
     public void addOnClick(View view) {
-        LayoutInflater layoutInflater
+        /*LayoutInflater layoutInflater
                 = (LayoutInflater)getBaseContext()
                 .getSystemService(LAYOUT_INFLATER_SERVICE);
         View popupView = layoutInflater.inflate(R.layout.activity_popup, null);
@@ -87,13 +90,24 @@ public class MainPageActivity extends Activity {
         okayButton.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
-                popupWindow.dismiss();
-                layout_MainMenu.getForeground().setAlpha(0);
-                Time now = new Time();
-                now.setToNow();
+                if (!editText.getText().toString().isEmpty()) {
+                    popupWindow.dismiss();
+                    layout_MainMenu.getForeground().setAlpha(0);
+                    Time now = new Time();
+                    now.setToNow();
 
-                MemorizeCard card = new MemorizeCard(getActivity(), editText.getText().toString(), 1, now);
-                cards.add(card);
+                    MemorizeCard card = new MemorizeCard(getActivity(), editText.getText().toString(), 1, now);
+                    cards.add(card);
+                }
+                else {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+                    builder.setMessage("Must enter an item")
+                            .setNegativeButton("Okay", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                }
+                            }).show();
+                }
             }
         });
 
@@ -109,6 +123,49 @@ public class MainPageActivity extends Activity {
         popupWindow.setFocusable(true);
         popupWindow.update();
         layout_MainMenu.getForeground().setAlpha(150);
-        popupWindow.showAtLocation(popupView, Gravity.CENTER, 0, 0);
+        popupWindow.showAtLocation(popupView, Gravity.CENTER, 0, 0);*/
+        final EditText input = new EditText(this);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage(R.string.popupAddItem);
+        builder.setView(input);
+        builder.setPositiveButton(R.string.popupOkayButton, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        //if (!input.getText().toString().isEmpty()) {
+                        Time now = new Time();
+                        now.setToNow();
+
+                        MemorizeCard card = new MemorizeCard(getActivity(), input.getText().toString(), 1, now);
+                        cards.add(card);
+
+                        CardArrayAdapter mCardArrayAdapter = new CardArrayAdapter(getActivity(), cards);
+                        mCardArrayAdapter.setEnableUndo(true);
+                        mCardArrayAdapter.setInnerViewTypeCount(1);
+
+                        CardListView listView = (CardListView) getActivity().findViewById(R.id.myList);
+                        if (listView != null) {
+                            listView.setAdapter(mCardArrayAdapter);
+                        }
+                        /*} else {
+                            final AlertDialog.Builder errorBuilder = new AlertDialog.Builder(getActivity());
+
+                            errorBuilder.setMessage("Must enter an item")
+                                    .setPositiveButton(R.string.popupOkayButton, new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            AlertDialog dialog2 = builder.show();
+                                            dialog2.show();
+                                        }
+                                    }).show();
+                        }*/
+                    }
+                }).setNegativeButton(R.string.popupCancelButton, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        // Do nothing.
+                    }
+                });
+        AlertDialog dialog = builder.show();
+        TextView messageText = (TextView)dialog.findViewById(android.R.id.message);
+        messageText.setGravity(Gravity.CENTER);
+        dialog.show();
+        dialog.getWindow().setLayout(450, 350);
     }
 }

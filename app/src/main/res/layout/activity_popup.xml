@@ -13,35 +13,35 @@
         android:orientation="vertical"
         android:layout_margin="20dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text="@string/popupAddItem"
-                    android:textSize="20sp"/>
-                <EditText
-                    android:id="@+id/editText"
-                    android:layout_width="150dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_launcher"
-                    android:inputType="textPersonName"/>
-                <LinearLayout
-                    android:layout_width="fill_parent"
-                    android:layout_height="fill_parent"
-                    android:orientation="horizontal">
-                    <Button
-                        android:id="@+id/okayButton"
-                        android:layout_width="79sp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:text="@string/popupOkayButton" />
-                    <Button
-                        android:id="@+id/cancelButton"
-                        android:layout_width="79sp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:text="@string/popupCancelButton" />
-                    </LinearLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/popupAddItem"
+            android:textSize="20sp"/>
+        <EditText
+            android:id="@+id/editText"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_launcher"
+            android:inputType="textPersonName"/>
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="horizontal">
+            <Button
+                android:id="@+id/okayButton"
+                android:layout_width="79sp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/popupOkayButton" />
+            <Button
+                android:id="@+id/cancelButton"
+                android:layout_width="79sp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/popupCancelButton" />
+        </LinearLayout>
     </LinearLayout>
 </LinearLayout>
