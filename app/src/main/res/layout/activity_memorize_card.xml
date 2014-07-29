@@ -12,17 +12,16 @@
         android:textSize="30sp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="90sp"
+        android:layout_marginBottom="120sp"
         android:gravity="center"/>
 
-    <ImageButton
+    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/checkmarkButton"
-        android:layout_alignParentBottom="true"
+        android:text="@string/memorizegotit"
+        android:id="@+id/button"
+        android:layout_alignBottom="@+id/displayItem"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="96dp"
-        android:src="@drawable/ic_cab_done_holo_light"
-        android:onClick="checkmarkOnClick"/>
+        android:onClick="gotitOnClick"/>
 
 </RelativeLayout>

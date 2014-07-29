@@ -60,7 +60,7 @@ public class MemorizeCard extends Card {
 
         NotificationCompat.Action action =
                 new NotificationCompat.Action.Builder(R.drawable.ic_circle,
-                        "Add", actionPendingIntent)
+                        "Got it!", actionPendingIntent)
                         .build();
 
         NotificationCompat.Builder notificationBuilder =
@@ -72,8 +72,7 @@ public class MemorizeCard extends Card {
                         .setContentIntent(viewPendingIntent);
 
         NotificationCompat.BigTextStyle bigStyle = new NotificationCompat.BigTextStyle();
-        bigStyle.setBigContentTitle("Memorize")
-                .bigText(mTitleHeader);
+        bigStyle.setBigContentTitle(mTitleHeader);
 
         Notification secondPage =
                 new NotificationCompat.Builder(getContext())

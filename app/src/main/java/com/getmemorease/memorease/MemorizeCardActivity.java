@@ -45,7 +45,7 @@ public class MemorizeCardActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void checkmarkOnClick(View view) {
+    public void gotitOnClick(View view) {
         finish();
     }
 }

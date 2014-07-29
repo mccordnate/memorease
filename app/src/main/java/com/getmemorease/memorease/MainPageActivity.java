@@ -7,16 +7,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.format.Time;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewGroup.LayoutParams;
 import android.view.View;
-import android.widget.Button;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
-import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,9 +21,9 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import it.gmariotti.cardslib.library.internal.Card;
@@ -58,14 +54,12 @@ public class MainPageActivity extends Activity {
             public void done(List<ParseObject> parseObjects, ParseException e) {
                 for(ParseObject parseObject : parseObjects){
                     MemorizeCard card = new MemorizeCard(getApplicationContext(), parseObject.getString("info"), parseObject.getInt("level"), new Time(parseObject.getString("time")));
+                    card.setObjectId(parseObject.getObjectId());
                     cards.add(card);
-
-                    cardListCreate();
                 }
+                cardListCreate();
             }
         });
-
-
     }
 
     public void cardListCreate(){
@@ -159,50 +153,47 @@ public class MainPageActivity extends Activity {
         builder.setMessage(R.string.popupAddItem);
         builder.setView(input);
         builder.setPositiveButton(R.string.popupOkayButton, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        //if (!input.getText().toString().isEmpty()) {
-                        Time now = new Time();
-                        now.setToNow();
+            public void onClick(DialogInterface dialog, int whichButton) {
+                if (!input.getText().toString().isEmpty()) {
+                    Time now = new Time();
+                    now.setToNow();
 
-                        MemorizeCard card = new MemorizeCard(getActivity(), input.getText().toString(), 1, now);
-                        cards.add(card);
+                    final MemorizeCard card = new MemorizeCard(getActivity(), input.getText().toString(), 1, now);
+                    cards.add(card);
 
-                        ParseObject parseCard = new ParseObject("Card");
-                        parseCard.put("user", ParseUser.getCurrentUser());
-                        parseCard.put("info", card.getCardHeader().getTitle());
-                        parseCard.put("level", 1);
-                        parseCard.put("time", now.toString());
-                        parseCard.saveInBackground();
-
-                        CardArrayAdapter mCardArrayAdapter = new CardArrayAdapter(getActivity(), cards);
-                        mCardArrayAdapter.setEnableUndo(true);
-                        mCardArrayAdapter.setInnerViewTypeCount(1);
-
-                        CardListView listView = (CardListView) getActivity().findViewById(R.id.myList);
-                        if (listView != null) {
-                            listView.setAdapter(mCardArrayAdapter);
+                    final ParseObject parseCard = new ParseObject("Card");
+                    parseCard.put("user", ParseUser.getCurrentUser());
+                    parseCard.put("info", card.getmTitleHeader());
+                    parseCard.put("level", 1);
+                    parseCard.put("time", card.getNextTimer().toString());
+                    parseCard.saveInBackground(new SaveCallback() {
+                        @Override
+                        public void done(ParseException e) {
+                            if (e == null) {
+                                card.setObjectId(parseCard.getObjectId());
+                            } else {
+                                // something went wrong
+                            }
                         }
-                        /*} else {
-                            final AlertDialog.Builder errorBuilder = new AlertDialog.Builder(getActivity());
+                    });
 
-                            errorBuilder.setMessage("Must enter an item")
-                                    .setPositiveButton(R.string.popupOkayButton, new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            AlertDialog dialog2 = builder.show();
-                                            dialog2.show();
-                                        }
-                                    }).show();
-                        }*/
-                    }
-                }).setNegativeButton(R.string.popupCancelButton, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        // Do nothing.
-                    }
-                });
+
+                    cardListCreate();
+
+                } else {
+                    Toast.makeText(getApplicationContext(), "Please enter an item", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }).setNegativeButton(R.string.popupCancelButton, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                // Do nothing.
+            }
+        });
         AlertDialog dialog = builder.show();
         TextView messageText = (TextView)dialog.findViewById(android.R.id.message);
         messageText.setGravity(Gravity.CENTER);
         dialog.show();
         dialog.getWindow().setLayout(450, 350);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
     }
 }
