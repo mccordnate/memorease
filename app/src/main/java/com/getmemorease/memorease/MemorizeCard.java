@@ -48,9 +48,23 @@ public class MemorizeCard extends Card {
     private void pushNotification() {
         int notificationId = 001;
         // Build intent for notification content
-        Intent viewIntent = new Intent(getContext(), MainPageActivity.class);
+        Intent memorizeScreen = new Intent();
+        memorizeScreen.setClassName("com.getmemorease.memorease", "com.getmemorease.memorease.MemorizeCardActivity");
+        memorizeScreen.putExtra("item", mTitleHeader);
+        memorizeScreen.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         PendingIntent viewPendingIntent =
-                PendingIntent.getActivity(getContext(), 0, viewIntent, 0);
+                PendingIntent.getActivity(getContext(), 0, memorizeScreen, 0);
+
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Card");
+        query.getInBackground(objectId, new GetCallback<ParseObject>() {
+            public void done(ParseObject object, ParseException e) {
+                if (e == null) {
+                    object.increment("level");
+                } else {
+                    // something went wrong
+                }
+            }
+        });
 
         // Create an intent for the reply action
         Intent actionIntent = new Intent(getContext(), MainPageActivity.class);
@@ -125,11 +139,7 @@ public class MemorizeCard extends Card {
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
-                Intent memorizeScreen = new Intent();
-                memorizeScreen.setClassName("com.getmemorease.memorease", "com.getmemorease.memorease.MemorizeCardActivity");
-                memorizeScreen.putExtra("item", mTitleHeader);
-                memorizeScreen.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                getContext().startActivity(memorizeScreen);
+                gotoMemorizationPage();
             }
         });
 
@@ -137,6 +147,25 @@ public class MemorizeCard extends Card {
 
         //Set the card inner text
         setTitle(mTitleMain);
+    }
+
+    private void gotoMemorizationPage() {
+        Intent memorizeScreen = new Intent();
+        memorizeScreen.setClassName("com.getmemorease.memorease", "com.getmemorease.memorease.MemorizeCardActivity");
+        memorizeScreen.putExtra("item", mTitleHeader);
+        memorizeScreen.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        getContext().startActivity(memorizeScreen);
+
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Card");
+        query.getInBackground(objectId, new GetCallback<ParseObject>() {
+            public void done(ParseObject object, ParseException e) {
+                if (e == null) {
+                    object.increment("level");
+                } else {
+                    // something went wrong
+                }
+            }
+        });
     }
 
     private String timeOfNextTimer(int level, Time time){

@@ -46,6 +46,7 @@ public class MemorizeCardActivity extends Activity {
     }
 
     public void gotitOnClick(View view) {
+
         finish();
     }
 }
