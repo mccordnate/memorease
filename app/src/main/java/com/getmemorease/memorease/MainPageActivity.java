@@ -2,6 +2,7 @@ package com.getmemorease.memorease;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ClipData;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,17 +12,23 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.parse.FindCallback;
+import com.parse.GetCallback;
+import com.parse.Parse;
+import com.parse.ParseACL;
+import com.parse.ParseAnonymousUtils;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
+import com.parse.ui.ParseLoginBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +41,6 @@ import it.gmariotti.cardslib.library.view.CardListView;
 public class MainPageActivity extends Activity {
 
     private ArrayList<Card> cards = new ArrayList<Card>();
-    private FrameLayout layout_MainMenu;
 
     public Activity getActivity(){
         return MainPageActivity.this;
@@ -44,20 +50,25 @@ public class MainPageActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_page);
-        layout_MainMenu = (FrameLayout) findViewById(R.id.mainmenu);
-        layout_MainMenu.getForeground().setAlpha(0);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
 
         ParseQuery<ParseObject> query = new ParseQuery<ParseObject>("Card");
         query.whereEqualTo("user", ParseUser.getCurrentUser());
         query.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> parseObjects, ParseException e) {
-                for(ParseObject parseObject : parseObjects){
-                    MemorizeCard card = new MemorizeCard(getApplicationContext(), parseObject.getString("info"), parseObject.getInt("level"), new Time(parseObject.getString("time")));
-                    card.setObjectId(parseObject.getObjectId());
-                    cards.add(card);
+                if (parseObjects != null) {
+                    for (ParseObject parseObject : parseObjects) {
+                        MemorizeCard card = new MemorizeCard(getApplicationContext(), parseObject.getString("info"), parseObject.getInt("level"), new Time(parseObject.getString("time")));
+                        card.setObjectId(parseObject.getObjectId());
+                        cards.add(card);
+                    }
+                    cardListCreate();
                 }
-                cardListCreate();
             }
         });
     }
@@ -77,6 +88,12 @@ public class MainPageActivity extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.my, menu);
+        if (ParseUser.getCurrentUser() != null) {
+            if (ParseAnonymousUtils.isLinked(ParseUser.getCurrentUser()))
+                menu.findItem(R.id.action_login).setTitle("Login");
+            else
+                menu.findItem(R.id.action_login).setTitle("Logout");
+        }
         return true;
     }
 
@@ -88,66 +105,49 @@ public class MainPageActivity extends Activity {
         int id = item.getItemId();
         if (id == R.id.action_settings) {
             return true;
-        } else if(id == R.id.action_logout){
-            ParseUser.getCurrentUser().logOut();
-            Intent intent = new Intent(this, LoginActivity.class);
-            intent.putExtra("localDatastoreEnabled", true);
-            startActivity(intent);
-            finish();
+        } else if(id == R.id.action_login){
+            if (ParseUser.getCurrentUser() != null) {
+                if (ParseAnonymousUtils.isLinked(ParseUser.getCurrentUser())) {
+                    ParseLoginBuilder builder = new ParseLoginBuilder(getActivity());
+                    startActivityForResult(builder.build(), 0);
+                    item.setTitle("Logout");
+                }
+                else {
+                    ParseUser.logOut();
+                    cards.clear();
+                    cardListCreate();
+                    item.setTitle("Login");
+                }
+            }
         }
         return super.onOptionsItemSelected(item);
     }
 
-    public void addOnClick(View view) {
-        /*LayoutInflater layoutInflater
-                = (LayoutInflater)getBaseContext()
-                .getSystemService(LAYOUT_INFLATER_SERVICE);
-        View popupView = layoutInflater.inflate(R.layout.activity_popup, null);
-        final PopupWindow popupWindow = new PopupWindow(
-                popupView,
-                LayoutParams.WRAP_CONTENT,
-                LayoutParams.WRAP_CONTENT);
-
-        final EditText editText = (EditText)popupView.findViewById(R.id.editText);
-
-        final Button okayButton = (Button)popupView.findViewById(R.id.okayButton);
-        okayButton.setOnClickListener(new Button.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!editText.getText().toString().isEmpty()) {
-                    popupWindow.dismiss();
-                    layout_MainMenu.getForeground().setAlpha(0);
-                    Time now = new Time();
-                    now.setToNow();
-
-                    MemorizeCard card = new MemorizeCard(getActivity(), editText.getText().toString(), 1, now);
-                    cards.add(card);
-                }
-                else {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-
-                    builder.setMessage("Must enter an item")
-                            .setNegativeButton("Okay", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Check which request we're responding to
+        if (requestCode == 0) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+                if (!cards.isEmpty()){
+                    for (Card card : cards){
+                        final MemorizeCard memorizeCard = (MemorizeCard) card;
+                        ParseQuery<ParseObject> query = ParseQuery.getQuery("Card");
+                        query.getInBackground(memorizeCard.getObjectId(), new GetCallback<ParseObject>() {
+                            public void done(ParseObject object, ParseException e) {
+                                if (e == null) {
+                                    object.put("user", ParseUser.getCurrentUser());
+                                    object.saveEventually();
                                 }
-                            }).show();
+                            }
+                        });
+                    }
                 }
             }
-        });
+        }
+    }
 
-        final Button cancelButton = (Button)popupView.findViewById(R.id.cancelButton);
-        cancelButton.setOnClickListener(new Button.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                popupWindow.dismiss();
-                layout_MainMenu.getForeground().setAlpha(0);
-            }
-        });
-
-        popupWindow.setFocusable(true);
-        popupWindow.update();
-        layout_MainMenu.getForeground().setAlpha(150);
-        popupWindow.showAtLocation(popupView, Gravity.CENTER, 0, 0);*/
+    public void addOnClick(View view) {
         final EditText input = new EditText(this);
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage(R.string.popupAddItem);

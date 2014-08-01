@@ -3,8 +3,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:windowSoftInputMode="adjustResize"
-    android:theme="@style/AppTheme"
-    android:foreground="@drawable/dim">
+    android:theme="@style/AppTheme">
 
     <it.gmariotti.cardslib.library.view.CardListView
         android:layout_width="match_parent"
