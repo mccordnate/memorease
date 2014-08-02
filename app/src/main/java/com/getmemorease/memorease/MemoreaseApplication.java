@@ -4,6 +4,7 @@ import android.app.Application;
 
 import com.parse.Parse;
 import com.parse.ParseACL;
+import com.parse.ParseException;
 import com.parse.ParseFacebookUtils;
 import com.parse.ParseTwitterUtils;
 import com.parse.ParseUser;
@@ -15,6 +16,7 @@ public class MemoreaseApplication extends Application {
     public void onCreate() {
         super.onCreate();
         // Required - Initialize the Parse SDK
+        Parse.enableLocalDatastore(this);
         Parse.initialize(this, "jBdBeXxeExKcNqhA8Z1cO3b1EUpUP28bHNIbAdzm", "af9JUMCI74K8ouSnFzWTCAb7jXNF9DdkGXxOLlDO");
         ParseUser.enableAutomaticUser();
         ParseACL defaultACL = new ParseACL();

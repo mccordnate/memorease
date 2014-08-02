@@ -18,12 +18,21 @@ public class MemorizeCardActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_memorize_card);
 
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            TextView textView = (TextView) findViewById(R.id.displayItem);
-            item = extras.getString("item");
-            textView.setText(item);
+        Intent inIntent = getIntent();
+
+        TextView textView = (TextView) findViewById(R.id.displayItem);
+
+        Boolean finish = inIntent.getBooleanExtra("dimiss", false);
+        if (finish) {
+            finish();
+            Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.addCategory(Intent.CATEGORY_HOME);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
         }
+
+        item = inIntent.getStringExtra("item");
+        textView.setText(item);
     }
 
     @Override
@@ -46,7 +55,10 @@ public class MemorizeCardActivity extends Activity {
     }
 
     public void gotitOnClick(View view) {
-
         finish();
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 }
