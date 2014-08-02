@@ -10,8 +10,14 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.parse.GetCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
+
 public class MemorizeCardActivity extends Activity {
     private String item = null;
+    private String objectId = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +39,8 @@ public class MemorizeCardActivity extends Activity {
 
         item = inIntent.getStringExtra("item");
         textView.setText(item);
+
+        objectId = inIntent.getStringExtra("objectId");
     }
 
     @Override
@@ -55,6 +63,19 @@ public class MemorizeCardActivity extends Activity {
     }
 
     public void gotitOnClick(View view) {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Card");
+        query.fromLocalDatastore();
+        query.getInBackground(objectId, new GetCallback<ParseObject>() {
+            public void done(ParseObject object, ParseException e) {
+                if (e == null) {
+                    object.increment("level");
+                    object.saveEventually();
+                } else {
+                    // something went wrong
+                }
+            }
+        });
+
         finish();
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_HOME);

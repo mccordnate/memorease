@@ -59,6 +59,7 @@ public class MemorizeCard extends Card {
         Bundle extras = new Bundle();
         extras.putString("item", mTitleHeader);
         extras.putBoolean("dismiss", false);
+        extras.putString("objectId", objectId);
         memorizeScreen.putExtras(extras);
         memorizeScreen.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         PendingIntent viewPendingIntent =
@@ -71,6 +72,7 @@ public class MemorizeCard extends Card {
         Bundle actionExtras = new Bundle();
         actionExtras.putString("item", mTitleHeader);
         actionExtras.putBoolean("dismiss", true);
+        actionExtras.putString("objectId", objectId);
         actionIntent.putExtras(actionExtras);
         actionIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         PendingIntent actionPendingIntent =
@@ -173,22 +175,13 @@ public class MemorizeCard extends Card {
     private void gotoMemorizationPage() {
         Intent memorizeScreen = new Intent();
         memorizeScreen.setClassName("com.getmemorease.memorease", "com.getmemorease.memorease.MemorizeCardActivity");
-        memorizeScreen.putExtra("item", mTitleHeader);
+        Bundle actionExtras = new Bundle();
+        actionExtras.putString("item", mTitleHeader);
+        actionExtras.putBoolean("dismiss", false);
+        actionExtras.putString("objectId", objectId);
+        memorizeScreen.putExtras(actionExtras);
         memorizeScreen.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         getContext().startActivity(memorizeScreen);
-
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("Card");
-        query.fromLocalDatastore();
-        query.getInBackground(objectId, new GetCallback<ParseObject>() {
-            public void done(ParseObject object, ParseException e) {
-                if (e == null) {
-                    object.increment("level");
-                    object.saveEventually();
-                } else {
-                    // something went wrong
-                }
-            }
-        });
     }
 
     private String timeOfNextTimer(int level, Time time){

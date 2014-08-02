@@ -28,6 +28,7 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
+import com.parse.SignUpCallback;
 import com.parse.ui.ParseLoginBuilder;
 
 import java.util.ArrayList;
@@ -41,7 +42,6 @@ import it.gmariotti.cardslib.library.view.CardListView;
 public class MainPageActivity extends Activity {
 
     private ArrayList<Card> cards = new ArrayList<Card>();
-    private ArrayList<String> objectIds = new ArrayList<String>();
 
     public Activity getActivity(){
         return MainPageActivity.this;
@@ -51,71 +51,55 @@ public class MainPageActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_page);
-
-        ParseQuery<ParseObject> query = new ParseQuery<ParseObject>("Card");
-        query.whereEqualTo("user", ParseUser.getCurrentUser());
-
-        query.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> parseObjects, ParseException e) {
-                if (parseObjects != null) {
-                    for (ParseObject parseObject : parseObjects) {
-                        try {
-                            parseObject.pin();
-                        } catch (ParseException e1) {
-                            e1.printStackTrace();
-                        }
-                    };
-                }
-            }
-        });
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        cards.clear();
+
+        try {
+            ParseUser.getCurrentUser().pin();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
 
         setTitle(ParseUser.getCurrentUser().getObjectId());
 
         ParseQuery<ParseObject> query = new ParseQuery<ParseObject>("Card");
         query.whereEqualTo("user", ParseUser.getCurrentUser());
-
         query.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> parseObjects, ParseException e) {
                 if (parseObjects != null) {
-                    for (ParseObject parseObject : parseObjects) {
-                        if (!objectIds.contains(parseObject.getObjectId())){
-                            MemorizeCard card = new MemorizeCard(getApplicationContext(), parseObject.getString("info"), parseObject.getInt("level"), new Time(parseObject.getString("time")));
-                            card.setObjectId(parseObject.getObjectId());
-                            objectIds.add(card.getObjectId());
-                            cards.add(card);
-                        }
-                    };
-                    cardListCreate();
+                    try {
+                        ParseObject.pinAll(parseObjects);
+                    } catch (ParseException e1) {
+                        e1.printStackTrace();
+                    }
                 }
-            }
-        });
 
-        ParseQuery<ParseObject> localQuery = new ParseQuery<ParseObject>("Card");
-        localQuery.fromLocalDatastore();
-
-        localQuery.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> parseObjects, ParseException e) {
-                if (parseObjects != null) {
-                    for (ParseObject parseObject : parseObjects) {
-                        if (!objectIds.contains(parseObject.getObjectId())){
-                            MemorizeCard card = new MemorizeCard(getApplicationContext(), parseObject.getString("info"), parseObject.getInt("level"), new Time(parseObject.getString("time")));
-                            card.setObjectId(parseObject.getObjectId());
-                            objectIds.add(card.getObjectId());
-                            cards.add(card);
+                ParseQuery<ParseObject> localQuery = new ParseQuery<ParseObject>("Card");
+                localQuery.fromLocalDatastore();
+                localQuery.findInBackground(new FindCallback<ParseObject>() {
+                    @Override
+                    public void done(List<ParseObject> parseObjects, ParseException e) {
+                        if (parseObjects != null) {
+                            for (ParseObject parseObject : parseObjects) {
+                                MemorizeCard card = new MemorizeCard(getApplicationContext(), parseObject.getString("info"), parseObject.getInt("level"), new Time(parseObject.getString("time")));
+                                card.setObjectId(parseObject.getObjectId());
+                                parseObject.put("user", ParseUser.getCurrentUser().toString());
+                                parseObject.saveEventually();
+                                cards.add(card);
+                            }
+                            cardListCreate();
                         }
                     }
-                    cardListCreate();
-                }
+                });
             }
         });
+
+
     }
 
     public void cardListCreate(){
@@ -154,12 +138,12 @@ public class MainPageActivity extends Activity {
             if (ParseUser.getCurrentUser() != null) {
                 if (ParseAnonymousUtils.isLinked(ParseUser.getCurrentUser())) {
                     ParseLoginBuilder builder = new ParseLoginBuilder(getActivity());
-                    startActivityForResult(builder.build(), 0);
-                    item.setTitle("Logout");
+                    startActivity(builder.build());
+                    invalidateOptionsMenu();
                 }
                 else {
                     ParseUser.logOut();
-                    item.setTitle("Login");
+                    invalidateOptionsMenu();
                 }
             }
         }
@@ -172,49 +156,23 @@ public class MainPageActivity extends Activity {
         if (requestCode == 0) {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
-                if (!cards.isEmpty()){
-                    for (Card card : cards){
-                        final MemorizeCard memorizeCard = (MemorizeCard) card;
-                        /*ParseQuery<ParseObject> query = ParseQuery.getQuery("Card");
-                        try {
-                            ParseObject object = query.get(memorizeCard.getObjectId());
-                            object.put("user", ParseUser.getCurrentUser());
-                            object.saveEventually();
-                        } catch (ParseException e) {
-                            ParseQuery<ParseObject> localQuery = ParseQuery.getQuery("Card");
-                            localQuery.fromLocalDatastore();
-                            try {
-                                ParseObject localObject = localQuery.get(memorizeCard.getObjectId());
-                                localObject.put("user", ParseUser.getCurrentUser());
-                                localObject.saveEventually();
-                            } catch (ParseException e1) {
-                                e1.printStackTrace();
+                ParseQuery<ParseObject> localQuery = new ParseQuery<ParseObject>("Card");
+                localQuery.fromLocalDatastore();
+
+                localQuery.findInBackground(new FindCallback<ParseObject>() {
+                    @Override
+                    public void done(List<ParseObject> parseObjects, ParseException e) {
+                        if (parseObjects != null) {
+                            for (ParseObject parseObject : parseObjects) {
+                                parseObject.put("user", ParseUser.getCurrentUser());
+                                parseObject.saveEventually();
                             }
-                        }*/
-                        ParseQuery<ParseObject> query = ParseQuery.getQuery("Card");
-                        query.getInBackground(memorizeCard.getObjectId(), new GetCallback<ParseObject>() {
-                            public void done(ParseObject parseObject, ParseException e) {
-                                if (e == null) {
-                                    parseObject.put("user", ParseUser.getCurrentUser());
-                                    parseObject.saveEventually();
-                                } else {
-                                    ParseQuery<ParseObject> localQuery = ParseQuery.getQuery("Card");
-                                    localQuery.fromLocalDatastore();
-                                    localQuery.getInBackground(memorizeCard.getObjectId(), new GetCallback<ParseObject>() {
-                                        public void done(ParseObject localParseObject, ParseException e) {
-                                            if (e == null) {
-                                                localParseObject.put("user", ParseUser.getCurrentUser());
-                                                localParseObject.saveEventually();
-                                            }
-                                        }
-                                    });
-                                }
-                            }
-                        });
+                        }
+                        cardListCreate();
                     }
-                }
+                });
+
                 setTitle(ParseUser.getCurrentUser().toString());
-                cardListCreate();
             }
         }
     }
@@ -236,25 +194,19 @@ public class MainPageActivity extends Activity {
                     final ParseObject parseCard = new ParseObject("Card");
                     parseCard.put("user", ParseUser.getCurrentUser());
                     parseCard.put("info", card.getmTitleHeader());
-                    parseCard.put("level", 1);
+                    parseCard.put("level", card.getCurrentLevel());
                     parseCard.put("time", card.getNextTimer().toString());
-                    //if (cards.size() == 1 && ParseAnonymousUtils.isLinked(ParseUser.getCurrentUser())){
-                        /*try {
-                            parseCard.save();
-                            card.setObjectId(parseCard.getObjectId());
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                        }*/
-                    //}else {
+
+                    parseCard.pinInBackground(null);
                     parseCard.saveEventually(new SaveCallback() {
                         @Override
                         public void done(ParseException e) {
                             if (e == null) {
                                 card.setObjectId(parseCard.getObjectId());
-                                objectIds.add(card.getObjectId());
                             }
                         }
                     });
+
                     cardListCreate();
                 }
                  else {
