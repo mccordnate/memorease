@@ -1,7 +1,9 @@
 package com.getmemorease.memorease;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -31,7 +33,10 @@ import com.parse.SaveCallback;
 import com.parse.SignUpCallback;
 import com.parse.ui.ParseLoginBuilder;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import it.gmariotti.cardslib.library.internal.Card;
@@ -51,56 +56,118 @@ public class MainPageActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_page);
+        cards.clear();
+        deleteAll();
+
+        if (ParseAnonymousUtils.isLinked(ParseUser.getCurrentUser())) {
+            ParseQuery<ParseObject> query = new ParseQuery<ParseObject>("Card");
+            query.whereEqualTo("user", ParseUser.getCurrentUser());
+            query.findInBackground(new FindCallback<ParseObject>() {
+                @Override
+                public void done(List<ParseObject> parseObjects, ParseException e) {
+                    if (e == null) {
+                        if (parseObjects != null) {
+                            try {
+                                ParseObject.pinAll(parseObjects);
+                            } catch (ParseException e1) {
+                                e1.printStackTrace();
+                            }
+                        }
+                    }
+
+                    ParseQuery<ParseObject> localQuery = new ParseQuery<ParseObject>("Card");
+                    localQuery.fromLocalDatastore();
+                    localQuery.findInBackground(new FindCallback<ParseObject>() {
+                        @Override
+                        public void done(List<ParseObject> parseObjects, ParseException e) {
+                            if (parseObjects != null) {
+                                for (ParseObject parseObject : parseObjects) {
+                                    Time cardTime = new Time();
+                                    cardTime.set(Long.valueOf(parseObject.getString("time")));
+                                    MemorizeCard card = new MemorizeCard(getApplicationContext(), parseObject.getString("info"), parseObject.getInt("level"), cardTime, false);
+                                    card.setObjectId(parseObject.getObjectId());
+                                    parseObject.put("user", ParseUser.getCurrentUser().toString());
+                                    parseObject.saveEventually();
+                                    //setNotification(card.getNextTimer());
+
+                                    if (!cards.contains(card))
+                                        cards.add(card);
+                                }
+                            }
+
+                            cardListCreate();
+                        }
+                    });
+                }
+            });
+        }else {
+            ParseQuery<ParseObject> localQuery = new ParseQuery<ParseObject>("Card");
+            localQuery.fromLocalDatastore();
+            localQuery.findInBackground(new FindCallback<ParseObject>() {
+                @Override
+                public void done(List<ParseObject> parseObjects, ParseException e) {
+                    if (parseObjects != null) {
+                        for (ParseObject parseObject : parseObjects) {
+                            Time cardTime = new Time();
+                            cardTime.set(Long.valueOf(parseObject.getString("time")));
+                            MemorizeCard card = new MemorizeCard(getApplicationContext(), parseObject.getString("info"), parseObject.getInt("level"), cardTime, false);
+                            card.setObjectId(parseObject.getObjectId());
+                            parseObject.put("user", ParseUser.getCurrentUser().toString());
+                            parseObject.saveEventually();
+                            //setNotification(card.getNextTimer());
+
+                            if (!cards.contains(card))
+                                cards.add(card);
+                        }
+                    }
+
+                    cardListCreate();
+                }
+            });
+        }
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        cards.clear();
-
-        try {
-            ParseUser.getCurrentUser().pin();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
 
         setTitle(ParseUser.getCurrentUser().getObjectId());
+    }
 
-        ParseQuery<ParseObject> query = new ParseQuery<ParseObject>("Card");
-        query.whereEqualTo("user", ParseUser.getCurrentUser());
-        query.findInBackground(new FindCallback<ParseObject>() {
+    private void deleteAll() {
+        ParseQuery<ParseObject> localQuery = new ParseQuery<ParseObject>("Card");
+        localQuery.fromLocalDatastore();
+        localQuery.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> parseObjects, ParseException e) {
                 if (parseObjects != null) {
                     try {
-                        ParseObject.pinAll(parseObjects);
+                        ParseObject.deleteAll(parseObjects);
                     } catch (ParseException e1) {
                         e1.printStackTrace();
                     }
                 }
-
-                ParseQuery<ParseObject> localQuery = new ParseQuery<ParseObject>("Card");
-                localQuery.fromLocalDatastore();
-                localQuery.findInBackground(new FindCallback<ParseObject>() {
-                    @Override
-                    public void done(List<ParseObject> parseObjects, ParseException e) {
-                        if (parseObjects != null) {
-                            for (ParseObject parseObject : parseObjects) {
-                                MemorizeCard card = new MemorizeCard(getApplicationContext(), parseObject.getString("info"), parseObject.getInt("level"), new Time(parseObject.getString("time")));
-                                card.setObjectId(parseObject.getObjectId());
-                                parseObject.put("user", ParseUser.getCurrentUser().toString());
-                                parseObject.saveEventually();
-                                cards.add(card);
-                            }
-                            cardListCreate();
-                        }
-                    }
-                });
-            }
+            };
         });
-
-
     }
+
+    /*private void setNotification(Time time) {
+        Calendar calendar = Calendar.getInstance();
+
+        calendar.set(Calendar.MONTH, time.month);
+        calendar.set(Calendar.YEAR, time.year);
+        calendar.set(Calendar.DAY_OF_MONTH, time.monthDay);
+
+        calendar.set(Calendar.HOUR_OF_DAY, time.hour);
+        calendar.set(Calendar.MINUTE, time.minute);
+        calendar.set(Calendar.SECOND, time.second);
+
+        Intent myIntent = new Intent(getActivity(), AlarmReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(), 0, myIntent, 0);
+
+        AlarmManager alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
+        alarmManager.set(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
+    }*/
 
     public void cardListCreate(){
         CardArrayAdapter mCardArrayAdapter = new CardArrayAdapter(getActivity(), cards);
@@ -164,7 +231,7 @@ public class MainPageActivity extends Activity {
                     public void done(List<ParseObject> parseObjects, ParseException e) {
                         if (parseObjects != null) {
                             for (ParseObject parseObject : parseObjects) {
-                                parseObject.put("user", ParseUser.getCurrentUser());
+                                parseObject.put("user", ParseUser.getCurrentUser().toString());
                                 parseObject.saveEventually();
                             }
                         }
@@ -188,24 +255,19 @@ public class MainPageActivity extends Activity {
                     Time now = new Time();
                     now.setToNow();
 
-                    final MemorizeCard card = new MemorizeCard(getActivity(), input.getText().toString(), 1, now);
+                    final MemorizeCard card = new MemorizeCard(getActivity(), input.getText().toString(), 1, now, true);
+                    //setNotification(card.getNextTimer());
                     cards.add(card);
 
-                    final ParseObject parseCard = new ParseObject("Card");
+                    ParseObject parseCard = new ParseObject("Card");
                     parseCard.put("user", ParseUser.getCurrentUser());
                     parseCard.put("info", card.getmTitleHeader());
                     parseCard.put("level", card.getCurrentLevel());
-                    parseCard.put("time", card.getNextTimer().toString());
+                    parseCard.put("time", Long.toString(card.getNextTimer().toMillis(false)));
 
-                    parseCard.pinInBackground(null);
-                    parseCard.saveEventually(new SaveCallback() {
-                        @Override
-                        public void done(ParseException e) {
-                            if (e == null) {
-                                card.setObjectId(parseCard.getObjectId());
-                            }
-                        }
-                    });
+                    parseCard.saveEventually();
+
+                    card.setObjectId(parseCard.getObjectId());
 
                     cardListCreate();
                 }

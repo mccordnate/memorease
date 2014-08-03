@@ -3,6 +3,7 @@ package com.getmemorease.memorease;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.format.Time;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,6 +15,7 @@ import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.parse.SaveCallback;
 
 public class MemorizeCardActivity extends Activity {
     private String item = null;
@@ -30,11 +32,7 @@ public class MemorizeCardActivity extends Activity {
 
         Boolean finish = inIntent.getBooleanExtra("dimiss", false);
         if (finish) {
-            finish();
-            Intent intent = new Intent(Intent.ACTION_MAIN);
-            intent.addCategory(Intent.CATEGORY_HOME);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
+            gotitOnClick(new View(getApplicationContext()));
         }
 
         item = inIntent.getStringExtra("item");
@@ -69,7 +67,20 @@ public class MemorizeCardActivity extends Activity {
             public void done(ParseObject object, ParseException e) {
                 if (e == null) {
                     object.increment("level");
+                    Time newTime = new Time();
+                    newTime.set(timeOfNextTimer(object.getInt("level")));
+                    object.put("time", newTime.toString());
+                    object.pinInBackground(null);
                     object.saveEventually();
+
+                    Bundle extras = new Bundle();
+                    extras.putString("item", item);
+                    extras.putBoolean("dismiss", false);
+                    extras.putString("objectId", objectId);
+                    extras.putLong("time", newTime.normalize(false));
+
+                    AlarmService as = new AlarmService(getApplicationContext(), extras);
+                    as.startAlarm();
                 } else {
                     // something went wrong
                 }
@@ -81,5 +92,37 @@ public class MemorizeCardActivity extends Activity {
         intent.addCategory(Intent.CATEGORY_HOME);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
+    }
+
+    private Time timeOfNextTimer(int level){
+        Time newTime = new Time();
+        newTime.setToNow();
+        switch (level){
+            case 1:
+                newTime.set(newTime.second, newTime.minute + 2, newTime.hour, newTime.monthDay, newTime.month, newTime.year);
+                return newTime;
+            case 2:
+                newTime.set(newTime.second, newTime.minute + 10, newTime.hour, newTime.monthDay, newTime.month, newTime.year);
+                return newTime;
+            case 3:
+                newTime.set(newTime.second, newTime.minute, newTime.hour + 1, newTime.monthDay, newTime.month, newTime.year);
+                return newTime;
+            case 4:
+                newTime.set(newTime.second, newTime.minute, newTime.hour + 5, newTime.monthDay, newTime.month, newTime.year);
+                return newTime;
+            case 5:
+                newTime.set(newTime.second, newTime.minute, newTime.hour + 24, newTime.monthDay, newTime.month, newTime.year);
+                return newTime;
+            case 6:
+                newTime.set(newTime.second, newTime.minute, newTime.hour, newTime.monthDay + 5, newTime.month, newTime.year);
+                return newTime;
+            case 7:
+                newTime.set(newTime.second, newTime.minute, newTime.hour, newTime.monthDay + 25, newTime.month, newTime.year);
+                return newTime;
+            case 8:
+                newTime.set(newTime.second, newTime.minute, newTime.hour, newTime.monthDay, newTime.month + 4, newTime.year);
+                return newTime;
+        }
+        return newTime;
     }
 }

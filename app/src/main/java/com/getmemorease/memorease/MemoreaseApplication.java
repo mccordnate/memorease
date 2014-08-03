@@ -20,7 +20,7 @@ public class MemoreaseApplication extends Application {
         Parse.initialize(this, "jBdBeXxeExKcNqhA8Z1cO3b1EUpUP28bHNIbAdzm", "af9JUMCI74K8ouSnFzWTCAb7jXNF9DdkGXxOLlDO");
         ParseUser.enableAutomaticUser();
         ParseACL defaultACL = new ParseACL();
-        ParseACL.setDefaultACL(defaultACL, true);
+        //ParseACL.setDefaultACL(defaultACL, true);
 
         Parse.setLogLevel(Parse.LOG_LEVEL_DEBUG);
 

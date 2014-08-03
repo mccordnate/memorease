@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.getmemorease.memorease" >
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
     <application
         android:name="com.getmemorease.memorease.MemoreaseApplication"
         android:allowBackup="true"
@@ -40,9 +44,10 @@
                 android:name="com.parse.ui.ParseLoginActivity.TWITTER_LOGIN_ENABLED"
                 android:value="true"/>
         </activity>
+
+        <!--<service android:name="com.getmemorease.memorease.AlarmService"
+            android:enabled="true" />-->
+
+        <receiver android:name="com.getmemorease.memorease.AlarmReceiver"/>
     </application>
-
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
 </manifest>

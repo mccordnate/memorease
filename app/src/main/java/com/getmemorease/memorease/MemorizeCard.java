@@ -37,18 +37,28 @@ public class MemorizeCard extends Card {
     private String objectId;
     private Context _context;
 
-    public MemorizeCard(Context context, String titleHeader, int currentLevel, Time startTime) {
+    public MemorizeCard(Context context, String titleHeader, int currentLevel, Time startTime, Boolean newTime) {
         //add to db
         super(context);
         this._context = context;
         this.mTitleHeader = titleHeader;
-        this.currentLevel = currentLevel;
-        this.nextTimer = startTime;
+        this.nextTimer = new Time();
         this.mTitleMain = "  Time until next memorization: " + timeOfNextTimer(currentLevel, startTime);
+        if (!newTime)
+            this.nextTimer = startTime;
+        this.currentLevel = currentLevel;
         init();
 
+        Bundle extras = new Bundle();
+        extras.putString("item", mTitleHeader);
+        extras.putString("objectId", objectId);
+        extras.putLong("time", nextTimer.toMillis(true));
+
+        AlarmService as = new AlarmService(context, extras);
+        as.startAlarm();
+
         //need to figure out how to push at certain time
-        pushNotification();
+        //pushNotification();
     }
 
     private void pushNotification() {
@@ -159,14 +169,14 @@ public class MemorizeCard extends Card {
             }
         });
 
-        setOnClickListener(new OnCardClickListener() {
+        /*setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
                 gotoMemorizationPage();
             }
-        });
+        });*/
 
-        setClickable(true);
+        setClickable(false);
 
         //Set the card inner text
         setTitle(mTitleMain);
