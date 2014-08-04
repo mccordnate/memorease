@@ -20,10 +20,13 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 
 import it.gmariotti.cardslib.library.internal.Card;
+import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 import it.gmariotti.cardslib.library.internal.CardHeader;
+import it.gmariotti.cardslib.library.view.CardListView;
 
 /**
  * Created by Tommy on 7/22/2014.
@@ -36,27 +39,35 @@ public class MemorizeCard extends Card {
     private int currentLevel;
     private String objectId;
     private Context _context;
+    private SingletonCardList cards;
+    private AlarmService as;
 
     public MemorizeCard(Context context, String titleHeader, int currentLevel, Time startTime, Boolean newTime) {
         //add to db
         super(context);
+        Time currentTime = new Time();
+        currentTime.setToNow();
         this._context = context;
         this.mTitleHeader = titleHeader;
-        this.nextTimer = new Time();
-        this.mTitleMain = "  Time until next memorization: " + timeOfNextTimer(currentLevel, startTime);
-        if (!newTime)
-            this.nextTimer = startTime;
         this.currentLevel = currentLevel;
+        this.nextTimer = new Time();
+        this.nextTimer = this.timeOfNextTimer(currentLevel, startTime);
+        if (!newTime) {
+            this.nextTimer.set(startTime);
+        }
+        this.updateTime(currentTime);
         init();
 
         Bundle extras = new Bundle();
         extras.putString("item", mTitleHeader);
         extras.putString("objectId", objectId);
-        extras.putLong("time", nextTimer.toMillis(true));
+        extras.putLong("time", nextTimer.normalize(false));
 
-        AlarmService as = new AlarmService(context, extras);
-        as.startAlarm();
+        this.as = new AlarmService(context, extras);
+        this.as.startAlarm();
 
+        this.cards = SingletonCardList.getInstance();
+        this.cards.add(this);
         //need to figure out how to push at certain time
         //pushNotification();
     }
@@ -106,7 +117,7 @@ public class MemorizeCard extends Card {
         // Create a big text style for the second page
         NotificationCompat.BigTextStyle secondPageStyle = new NotificationCompat.BigTextStyle();
         secondPageStyle.setBigContentTitle("Page 2")
-                .bigText(mTitleHeader);
+                .bigText(this.mTitleHeader);
 
         // Create second page notification
         Notification secondPageNotification =
@@ -137,7 +148,7 @@ public class MemorizeCard extends Card {
         CardHeader header = new CardHeader(_context);
 
         //Set the header title
-        header.setTitle(mTitleHeader);
+        header.setTitle(this.mTitleHeader);
 
         addCardHeader(header);
 
@@ -166,23 +177,122 @@ public class MemorizeCard extends Card {
                         }
                     }
                 });
+
+                as.cancel();
+                cards.remove(card);
             }
         });
 
-        /*setOnClickListener(new OnCardClickListener() {
+        setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
                 gotoMemorizationPage();
             }
-        });*/
+        });
 
         setClickable(false);
 
         //Set the card inner text
-        setTitle(mTitleMain);
+        setTitle(this.mTitleMain);
+    }
+
+    public void updateTime(Time currentTime) {
+        int updateTime;
+        switch (this.currentLevel){
+            case 1:
+                updateTime = this.nextTimer.minute - currentTime.minute;
+                if (updateTime == 0){
+                    this.mTitleMain = "Time for memorization!";
+                    this.setClickable(true);
+                }
+                else if (updateTime == 1){
+                    this.mTitleMain = "  Time until next memorization: 1 minute";
+                }else
+                    this.mTitleMain = "  Time until next memorization: " + Integer.toString(updateTime) + " minutes";
+                break;
+            case 2:
+                updateTime = this.nextTimer.minute - currentTime.minute;
+                if (updateTime == 0){
+                    this.mTitleMain = "Time for memorization!";
+                    this.setClickable(true);
+                }
+                else if (updateTime == 1){
+                    this.mTitleMain = "  Time until next memorization: 1 minute";
+                }else
+                    this.mTitleMain = "  Time until next memorization: " + Integer.toString(updateTime) + " minutes";
+                break;
+            case 3:
+                updateTime = this.nextTimer.hour - currentTime.hour;
+                if (updateTime == 0){
+                    this.mTitleMain = "Time for memorization!";
+                    this.setClickable(true);
+                }
+                else if (updateTime == 1){
+                    this.mTitleMain = "  Time until next memorization: 1 hour";
+                }else
+                    this.mTitleMain = "  Time until next memorization: " + Integer.toString(updateTime) + " hours";
+                break;
+            case 4:
+                updateTime = this.nextTimer.hour - currentTime.hour;
+                if (updateTime == 0){
+                    this.mTitleMain = "Time for memorization!";
+                    this.setClickable(true);
+                }
+                else if (updateTime == 1){
+                    this.mTitleMain = "  Time until next memorization: 1 hour";
+                }else
+                    this.mTitleMain = "  Time until next memorization: " + Integer.toString(updateTime) + " hours";
+                break;
+            case 5:
+                updateTime = this.nextTimer.hour - currentTime.hour;
+                if (updateTime == 0){
+                    this.mTitleMain = "Time for memorization!";
+                    this.setClickable(true);
+                }
+                else if (updateTime == 1){
+                    this.mTitleMain = "  Time until next memorization: 1 hour";
+                }else
+                    this.mTitleMain = "  Time until next memorization: " + Integer.toString(updateTime) + " hours";
+                break;
+            case 6:
+                updateTime = this.nextTimer.monthDay - currentTime.monthDay;
+                if (updateTime == 0){
+                    this.mTitleMain = "Time for memorization!";
+                    this.setClickable(true);
+                }
+                else if (updateTime == 1){
+                    this.mTitleMain = "  Time until next memorization: 1 day";
+                }else
+                    this.mTitleMain = "  Time until next memorization: " + Integer.toString(updateTime) + " days";
+                break;
+            case 7:
+                updateTime = this.nextTimer.monthDay - currentTime.monthDay;
+                if (updateTime == 0){
+                    this.mTitleMain = "Time for memorization!";
+                    this.setClickable(true);
+                }
+                else if (updateTime == 1){
+                    this.mTitleMain = "  Time until next memorization: 1 day";
+                }else
+                    this.mTitleMain = "  Time until next memorization: " + Integer.toString(updateTime) + " days";
+                break;
+            case 8:
+                updateTime = this.nextTimer.month - currentTime.month;
+                if (updateTime == 0){
+                    this.mTitleMain = "Time for memorization!";
+                    this.setClickable(true);
+                }
+                else if (updateTime == 1){
+                    this.mTitleMain = "  Time until next memorization: 1 month";
+                }else
+                    this.mTitleMain = "  Time until next memorization: " + Integer.toString(updateTime) + " months";
+                break;
+        }
     }
 
     private void gotoMemorizationPage() {
+        ++this.currentLevel;
+
         Intent memorizeScreen = new Intent();
         memorizeScreen.setClassName("com.getmemorease.memorease", "com.getmemorease.memorease.MemorizeCardActivity");
         Bundle actionExtras = new Bundle();
@@ -194,38 +304,50 @@ public class MemorizeCard extends Card {
         getContext().startActivity(memorizeScreen);
     }
 
-    private String timeOfNextTimer(int level, Time time){
+    private Time timeOfNextTimer(int level, Time currentTime){
+        Time newTime = new Time();
+        newTime.set(currentTime);
+        String titleAddition = "";
         switch (level){
             case 1:
-                nextTimer.set(time.second, time.minute + 2, time.hour, time.monthDay, time.month, time.year);
-                return "2 minutes";
+                newTime.minute += 2;
+                titleAddition = "2 minutes";
+                break;
             case 2:
-                nextTimer.set(time.second, time.minute + 10, time.hour, time.monthDay, time.month, time.year);
-                return "10 minutes";
+                newTime.minute += 10;
+                titleAddition = "10 minutes";
+                break;
             case 3:
-                nextTimer.set(time.second, time.minute, time.hour + 1, time.monthDay, time.month, time.year);
-                return "1 hour";
+                newTime.hour += 1;
+                titleAddition = "1 hour";
+                break;
             case 4:
-                nextTimer.set(time.second, time.minute, time.hour + 5, time.monthDay, time.month, time.year);
-                return "5 hours";
+                newTime.hour += 5;
+                titleAddition = "5 hours";
+                break;
             case 5:
-                nextTimer.set(time.second + 5, time.minute, time.hour + 24, time.monthDay, time.month, time.year);
-                return "1 day";
+                newTime.hour += 24;
+                titleAddition = "1 day";
+                break;
             case 6:
-                nextTimer.set(time.second + 5, time.minute, time.hour, time.monthDay + 5, time.month, time.year);
-                return "5 days";
+                newTime.monthDay += 5;
+                titleAddition = "5 days";
+                break;
             case 7:
-                nextTimer.set(time.second + 5, time.minute, time.hour, time.monthDay + 25, time.month, time.year);
-                return "25 days";
+                newTime.monthDay += 25;
+                titleAddition = "25 days";
+                break;
             case 8:
-                nextTimer.set(time.second, time.minute, time.hour, time.monthDay, time.month + 4, time.year);
-                return "4 months";
+                newTime.month += 4;
+                titleAddition = "4 months";
+                break;
         }
-        return "Completed!";
+        this.mTitleMain = "  Time until next memorization: " + titleAddition;
+        return newTime;
     }
 
     public Time getNextTimer() {
-        return nextTimer;
+        return this.nextTimer;
     }
 
     public void setNextTimer(Time nextTimer) {
@@ -233,15 +355,15 @@ public class MemorizeCard extends Card {
     }
 
     public String getmTitleHeader() {
-        return mTitleHeader;
+        return this.mTitleHeader;
     }
 
     public int getCurrentLevel() {
-        return currentLevel;
+        return this.currentLevel;
     }
 
     public String getObjectId() {
-        return objectId;
+        return this.objectId;
     }
 
     public void setObjectId(String objectId) {

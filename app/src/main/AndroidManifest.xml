@@ -25,7 +25,7 @@
         <activity
             android:name="com.getmemorease.memorease.MemorizeCardActivity"
             android:label="@string/title_activity_memorize_card"
-            android:launchMode="singleTop">
+            android:noHistory="true">
         </activity>
         <activity
             android:name="com.parse.ui.ParseLoginActivity"

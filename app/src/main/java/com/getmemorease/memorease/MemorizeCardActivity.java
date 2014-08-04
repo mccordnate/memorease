@@ -69,8 +69,7 @@ public class MemorizeCardActivity extends Activity {
                     object.increment("level");
                     Time newTime = new Time();
                     newTime.set(timeOfNextTimer(object.getInt("level")));
-                    object.put("time", newTime.toString());
-                    object.pinInBackground(null);
+                    object.put("time", Long.toString(newTime.normalize(false)));
                     object.saveEventually();
 
                     Bundle extras = new Bundle();

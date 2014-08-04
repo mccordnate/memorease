@@ -5,6 +5,7 @@ import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.ClipData;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -46,18 +47,32 @@ import it.gmariotti.cardslib.library.view.CardListView;
 
 public class MainPageActivity extends Activity {
 
-    private ArrayList<Card> cards = new ArrayList<Card>();
+    private SingletonCardList cards;
+    private CardArrayAdapter mCardArrayAdapter;
 
     public Activity getActivity(){
         return MainPageActivity.this;
+    }
+
+    public static Context getContext(){
+        return MainPageActivity.getContext();
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_page);
-        cards.clear();
-        deleteAll();
+        this.cards = SingletonCardList.getInstance();
+        this.cards.clear();
+
+        this.mCardArrayAdapter = new CardArrayAdapter(getActivity(), cards.getCardList());
+        this.mCardArrayAdapter.setEnableUndo(true);
+        this.mCardArrayAdapter.setInnerViewTypeCount(1);
+
+        CardListView listView = (CardListView) getActivity().findViewById(R.id.myList);
+        if (listView != null) {
+            listView.setAdapter(this.mCardArrayAdapter);
+        }
 
         if (ParseAnonymousUtils.isLinked(ParseUser.getCurrentUser())) {
             ParseQuery<ParseObject> query = new ParseQuery<ParseObject>("Card");
@@ -89,13 +104,10 @@ public class MainPageActivity extends Activity {
                                     parseObject.put("user", ParseUser.getCurrentUser().toString());
                                     parseObject.saveEventually();
                                     //setNotification(card.getNextTimer());
-
-                                    if (!cards.contains(card))
-                                        cards.add(card);
                                 }
                             }
 
-                            cardListCreate();
+                            mCardArrayAdapter.notifyDataSetChanged();
                         }
                     });
                 }
@@ -115,13 +127,10 @@ public class MainPageActivity extends Activity {
                             parseObject.put("user", ParseUser.getCurrentUser().toString());
                             parseObject.saveEventually();
                             //setNotification(card.getNextTimer());
-
-                            if (!cards.contains(card))
-                                cards.add(card);
                         }
                     }
 
-                    cardListCreate();
+                    mCardArrayAdapter.notifyDataSetChanged();
                 }
             });
         }
@@ -131,24 +140,25 @@ public class MainPageActivity extends Activity {
     protected void onStart() {
         super.onStart();
 
+        this.mCardArrayAdapter = new CardArrayAdapter(getActivity(), cards.getCardList());
+        this.mCardArrayAdapter.setEnableUndo(true);
+        this.mCardArrayAdapter.setInnerViewTypeCount(1);
+
+        CardListView listView = (CardListView) getActivity().findViewById(R.id.myList);
+        if (listView != null) {
+            listView.setAdapter(this.mCardArrayAdapter);
+        }
+
+        this.cards.updateTimes();
+        this.mCardArrayAdapter.notifyDataSetChanged();
         setTitle(ParseUser.getCurrentUser().getObjectId());
     }
 
-    private void deleteAll() {
+    private void deleteAll() throws ParseException {
         ParseQuery<ParseObject> localQuery = new ParseQuery<ParseObject>("Card");
         localQuery.fromLocalDatastore();
-        localQuery.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> parseObjects, ParseException e) {
-                if (parseObjects != null) {
-                    try {
-                        ParseObject.deleteAll(parseObjects);
-                    } catch (ParseException e1) {
-                        e1.printStackTrace();
-                    }
-                }
-            };
-        });
+        List<ParseObject> parseObjects = localQuery.find();
+        ParseObject.deleteAll(parseObjects);
     }
 
     /*private void setNotification(Time time) {
@@ -168,17 +178,6 @@ public class MainPageActivity extends Activity {
         AlarmManager alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
         alarmManager.set(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
     }*/
-
-    public void cardListCreate(){
-        CardArrayAdapter mCardArrayAdapter = new CardArrayAdapter(getActivity(), cards);
-        mCardArrayAdapter.setEnableUndo(true);
-        mCardArrayAdapter.setInnerViewTypeCount(1);
-
-        CardListView listView = (CardListView) getActivity().findViewById(R.id.myList);
-        if (listView != null) {
-            listView.setAdapter(mCardArrayAdapter);
-        }
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -235,7 +234,7 @@ public class MainPageActivity extends Activity {
                                 parseObject.saveEventually();
                             }
                         }
-                        cardListCreate();
+                        mCardArrayAdapter.notifyDataSetChanged();
                     }
                 });
 
@@ -257,19 +256,18 @@ public class MainPageActivity extends Activity {
 
                     final MemorizeCard card = new MemorizeCard(getActivity(), input.getText().toString(), 1, now, true);
                     //setNotification(card.getNextTimer());
-                    cards.add(card);
 
                     ParseObject parseCard = new ParseObject("Card");
                     parseCard.put("user", ParseUser.getCurrentUser());
                     parseCard.put("info", card.getmTitleHeader());
                     parseCard.put("level", card.getCurrentLevel());
-                    parseCard.put("time", Long.toString(card.getNextTimer().toMillis(false)));
+                    parseCard.put("time", Long.toString(card.getNextTimer().normalize(false)));
 
                     parseCard.saveEventually();
 
                     card.setObjectId(parseCard.getObjectId());
 
-                    cardListCreate();
+                    mCardArrayAdapter.notifyDataSetChanged();
                 }
                  else {
                     Toast.makeText(getApplicationContext(), "Please enter an item", Toast.LENGTH_SHORT).show();

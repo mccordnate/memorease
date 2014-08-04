@@ -120,6 +120,7 @@ public class AlarmService {
     private Context context;
     private PendingIntent mAlarmSender;
     private long time;
+    private AlarmManager am;
     public AlarmService(Context context, Bundle cardInfo) {
         this.context = context;
         this.time = cardInfo.getLong("time");
@@ -138,7 +139,11 @@ public class AlarmService {
         c.setTimeInMillis(time);
         long firstTime = c.getTimeInMillis();
         // Schedule the alarm!
-        AlarmManager am = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+        am = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         am.set(AlarmManager.RTC_WAKEUP, firstTime, mAlarmSender);
+    }
+
+    public void cancel(){
+        am.cancel(mAlarmSender);
     }
 }
